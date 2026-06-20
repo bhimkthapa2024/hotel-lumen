@@ -11,8 +11,11 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase only once
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase only if we have a valid config (prevents build errors in App Hosting)
+const app = !getApps().length && firebaseConfig.apiKey 
+  ? initializeApp(firebaseConfig) 
+  : getApps().length > 0 ? getApp() : initializeApp({ apiKey: 'dummy-key', projectId: 'dummy-project' }); // Fallback for build time
+
 const auth = getAuth(app);
 
 export { app, auth };

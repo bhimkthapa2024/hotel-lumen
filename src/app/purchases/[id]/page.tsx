@@ -4,11 +4,13 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Purchase, Supplier, ExpenseHead } from '@/lib/types';
 import { ArrowLeft, Printer } from 'lucide-react';
+import { useApi } from '@/lib/useApi';
 
 export default function PurchaseView({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const unwrappedParams = use(params);
   const id = unwrappedParams.id;
+  const { apiFetch } = useApi();
   
   const [purchase, setPurchase] = useState<Purchase | null>(null);
   const [supplier, setSupplier] = useState<Supplier | null>(null);
@@ -19,9 +21,9 @@ export default function PurchaseView({ params }: { params: Promise<{ id: string 
     async function fetchData() {
       try {
         const [purRes, supRes, expRes] = await Promise.all([
-          fetch('/api/data/purchases'),
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/expenseHeads')
+          apiFetch('/api/data/purchases'),
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/expenseHeads')
         ]);
         
         const purchases: Purchase[] = await purRes.json();

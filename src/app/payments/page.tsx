@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { Payment, Supplier, Bank } from '@/lib/types';
 import { Plus, Eye, Edit2 } from 'lucide-react';
 import { useUser } from '@/components/UserContext';
+import { useApi } from '@/lib/useApi';
 
 export default function PaymentsPage() {
   const { isAdmin } = useUser();
+  const { apiFetch } = useApi();
   const [payments, setPayments] = useState<(Payment & { supplierName?: string, bankName?: string })[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,9 +17,9 @@ export default function PaymentsPage() {
     async function fetchData() {
       try {
         const [suppliersRes, banksRes, paymentsRes] = await Promise.all([
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/banks'),
-          fetch('/api/data/payments')
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/banks'),
+          apiFetch('/api/data/payments')
         ]);
         
         const suppliersData: Supplier[] = await suppliersRes.json();

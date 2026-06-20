@@ -3,11 +3,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Supplier, Purchase, Payment, ExpenseHead } from '@/lib/types';
+import { useApi } from '@/lib/useApi';
 import { ArrowRight, TrendingDown, TrendingUp, DollarSign, Users, AlertCircle, PieChart as PieChartIcon } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
 export default function Home() {
   const router = useRouter();
+  const { apiFetch } = useApi();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -18,10 +20,10 @@ export default function Home() {
     async function fetchData() {
       try {
         const [supRes, purRes, payRes, expRes] = await Promise.all([
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/purchases'),
-          fetch('/api/data/payments'),
-          fetch('/api/data/expenseHeads')
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/purchases'),
+          apiFetch('/api/data/payments'),
+          apiFetch('/api/data/expenseHeads')
         ]);
         
         setSuppliers(await supRes.json());

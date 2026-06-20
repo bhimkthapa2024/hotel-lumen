@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
+import { verifyAuthToken } from '@/lib/auth-helpers';
 
 export async function GET(request: Request, { params }: { params: Promise<{ collection: string }> }) {
   try {
+    await verifyAuthToken(request as any);
     const { collection } = await params;
     const snapshot = await db.collection(collection).get();
     const data = snapshot.docs.map(doc => doc.data());
@@ -15,6 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ coll
 
 export async function POST(request: Request, { params }: { params: Promise<{ collection: string }> }) {
   try {
+    await verifyAuthToken(request as any);
     const { collection } = await params;
     const body = await request.json();
     
@@ -61,6 +64,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ col
 
 export async function PUT(request: Request, { params }: { params: Promise<{ collection: string }> }) {
   try {
+    await verifyAuthToken(request as any);
     const { collection } = await params;
     const body = await request.json();
     

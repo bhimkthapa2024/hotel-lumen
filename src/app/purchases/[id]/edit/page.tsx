@@ -8,12 +8,14 @@ import { useAlert } from '@/components/AlertContext';
 import { useUser } from '@/components/UserContext';
 import { Supplier, ExpenseHead, Purchase } from '@/lib/types';
 import SearchableSelect from '@/components/SearchableSelect';
+import { useApi } from '@/lib/useApi';
 
 export default function EditPurchasePage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
   const { isAdmin } = useUser();
   const { showAlert, showConfirm } = useAlert();
+  const { apiFetch } = useApi();
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [expenseHeads, setExpenseHeads] = useState<ExpenseHead[]>([]);
@@ -47,9 +49,9 @@ export default function EditPurchasePage({ params }: { params: Promise<{ id: str
   async function fetchData() {
     try {
       const [supRes, expRes, purRes] = await Promise.all([
-        fetch('/api/data/suppliers'),
-        fetch('/api/data/expenseHeads'),
-        fetch('/api/data/purchases')
+        apiFetch('/api/data/suppliers'),
+        apiFetch('/api/data/expenseHeads'),
+        apiFetch('/api/data/purchases')
       ]);
       const suppliersData = await supRes.json();
       const expenseHeadsData = await expRes.json();
@@ -103,7 +105,7 @@ export default function EditPurchasePage({ params }: { params: Promise<{ id: str
     e.preventDefault();
     setSavingSupplier(true);
     try {
-      const res = await fetch('/api/data/suppliers', {
+      const res = await apiFetch('/api/data/suppliers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(supplierForm)
@@ -151,7 +153,7 @@ export default function EditPurchasePage({ params }: { params: Promise<{ id: str
     setLoading(true);
     
     try {
-      const response = await fetch('/api/data/purchases', {
+      const response = await apiFetch('/api/data/purchases', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

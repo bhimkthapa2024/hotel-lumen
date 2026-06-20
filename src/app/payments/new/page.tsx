@@ -7,10 +7,12 @@ import Link from 'next/link';
 import { useAlert } from '@/components/AlertContext';
 import { Supplier, Bank } from '@/lib/types';
 import SearchableSelect from '@/components/SearchableSelect';
+import { useApi } from '@/lib/useApi';
 
 export default function NewPaymentPage() {
   const router = useRouter();
   const { showAlert, showConfirm } = useAlert();
+  const { apiFetch } = useApi();
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
@@ -28,8 +30,8 @@ export default function NewPaymentPage() {
     async function fetchData() {
       try {
         const [supRes, bankRes] = await Promise.all([
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/banks')
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/banks')
         ]);
         setSuppliers(await supRes.json());
         setBanks(await bankRes.json());
@@ -51,7 +53,7 @@ export default function NewPaymentPage() {
     setLoading(true);
     
     try {
-      const response = await fetch('/api/data/payments', {
+      const response = await apiFetch('/api/data/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

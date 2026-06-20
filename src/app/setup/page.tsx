@@ -5,10 +5,12 @@ import { useAlert } from '@/components/AlertContext';
 import { Bank, ExpenseHead, PropertyDetails } from '@/lib/types';
 import { Save, Building2, Tag, Pencil, X, Check, FileText, AlertTriangle, Download, UploadCloud } from 'lucide-react';
 import { useUser } from '@/components/UserContext';
+import { useApi } from '@/lib/useApi';
 
 export default function SetupPage() {
   const { showAlert } = useAlert();
   const { isAdmin, logout } = useUser();
+  const { apiFetch } = useApi();
   const [activeTab, setActiveTab] = useState<'property' | 'banks' | 'expenses'>('property');
   const [loading, setLoading] = useState(true);
   const [isWiping, setIsWiping] = useState(false);
@@ -44,9 +46,9 @@ export default function SetupPage() {
   const fetchData = async () => {
     try {
       const [banksRes, expensesRes, propertyRes] = await Promise.all([
-        fetch('/api/data/banks'),
-        fetch('/api/data/expenseHeads'),
-        fetch('/api/data/propertyDetails')
+        apiFetch('/api/data/banks'),
+        apiFetch('/api/data/expenseHeads'),
+        apiFetch('/api/data/propertyDetails')
       ]);
       
       setBanks(await banksRes.json());
@@ -75,7 +77,7 @@ export default function SetupPage() {
       const method = propertyDetails?.id ? 'PUT' : 'POST';
       const body = propertyDetails?.id ? { ...propertyForm, id: propertyDetails.id } : propertyForm;
 
-      await fetch('/api/data/propertyDetails', {
+      await apiFetch('/api/data/propertyDetails', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -94,7 +96,7 @@ export default function SetupPage() {
     e.preventDefault();
     setSavingBank(true);
     try {
-      await fetch('/api/data/banks', {
+      await apiFetch('/api/data/banks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bankForm)
@@ -111,7 +113,7 @@ export default function SetupPage() {
 
   const handleUpdateBank = async (id: string) => {
     try {
-      await fetch('/api/data/banks', {
+      await apiFetch('/api/data/banks', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...editBankForm })
@@ -135,7 +137,7 @@ export default function SetupPage() {
         .filter(s => s.length > 0)
         .map(name => ({ id: crypto.randomUUID(), name }));
 
-      await fetch('/api/data/expenseHeads', {
+      await apiFetch('/api/data/expenseHeads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -156,7 +158,7 @@ export default function SetupPage() {
 
   const handleUpdateExpenseHead = async (id: string) => {
     try {
-      await fetch('/api/data/expenseHeads', {
+      await apiFetch('/api/data/expenseHeads', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...editExpenseForm })
@@ -186,7 +188,7 @@ export default function SetupPage() {
         
       const combinedSubLedgers = [...(selectedHead.subLedgers || []), ...newSubLedgers];
 
-      await fetch('/api/data/expenseHeads', {
+      await apiFetch('/api/data/expenseHeads', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -212,7 +214,7 @@ export default function SetupPage() {
     
     setIsWiping(true);
     try {
-      await fetch('/api/data/wipe', {
+      await apiFetch('/api/data/wipe', {
         method: 'POST'
       });
       showAlert("All data has been successfully wiped.", "success");
@@ -225,8 +227,22 @@ export default function SetupPage() {
     }
   };
 
-  const handleExportBackup = () => {
-    window.location.href = '/api/data/backup';
+  const handleExportBackup = async () => {
+    try {
+      const res = await apiFetch('/api/data/backup');
+      if (!res.ok) throw new Error('Failed to generate backup');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotellumen_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (e) {
+      showAlert("Error exporting backup", "error");
+    }
   };
 
   const handleImportBackup = () => {
@@ -244,7 +260,7 @@ export default function SetupPage() {
       setIsRestoring(true);
       try {
         const fileContent = await file.text();
-        const res = await fetch('/api/data/restore', {
+        const res = await apiFetch('/api/data/restore', {
           method: 'POST',
           body: fileContent
         });

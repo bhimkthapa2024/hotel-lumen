@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { Purchase, Supplier, ExpenseHead } from '@/lib/types';
 import { Plus, Eye, Edit2 } from 'lucide-react';
 import { useUser } from '@/components/UserContext';
+import { useApi } from '@/lib/useApi';
 
 export default function PurchasesPage() {
   const { isAdmin } = useUser();
+  const { apiFetch } = useApi();
   const [purchases, setPurchases] = useState<(Purchase & { supplierName?: string, expenseHeadName?: string })[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,9 +17,9 @@ export default function PurchasesPage() {
     async function fetchData() {
       try {
         const [suppliersRes, expensesRes, purchasesRes] = await Promise.all([
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/expenseHeads'),
-          fetch('/api/data/purchases')
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/expenseHeads'),
+          apiFetch('/api/data/purchases')
         ]);
         
         const suppliersData: Supplier[] = await suppliersRes.json();

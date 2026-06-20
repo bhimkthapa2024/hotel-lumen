@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Payment, Supplier, Bank } from '@/lib/types';
 import { ArrowLeft, Printer } from 'lucide-react';
+import { useApi } from '@/lib/useApi';
 
 function numberToWords(num: number): string {
   if (!num) return 'Zero';
@@ -39,6 +40,7 @@ export default function PaymentView({ params }: { params: Promise<{ id: string }
   const router = useRouter();
   const unwrappedParams = use(params);
   const id = unwrappedParams.id;
+  const { apiFetch } = useApi();
   
   const [payment, setPayment] = useState<Payment | null>(null);
   const [supplier, setSupplier] = useState<Supplier | null>(null);
@@ -49,9 +51,9 @@ export default function PaymentView({ params }: { params: Promise<{ id: string }
     async function fetchData() {
       try {
         const [payRes, supRes, bankRes] = await Promise.all([
-          fetch('/api/data/payments'),
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/banks')
+          apiFetch('/api/data/payments'),
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/banks')
         ]);
         
         const payments: Payment[] = await payRes.json();

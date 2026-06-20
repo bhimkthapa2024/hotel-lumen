@@ -7,10 +7,12 @@ import Link from 'next/link';
 import { useAlert } from '@/components/AlertContext';
 import { Supplier, ExpenseHead, Purchase } from '@/lib/types';
 import SearchableSelect from '@/components/SearchableSelect';
+import { useApi } from '@/lib/useApi';
 
 export default function NewPurchasePage() {
   const router = useRouter();
   const { showAlert, showConfirm } = useAlert();
+  const { apiFetch } = useApi();
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [expenseHeads, setExpenseHeads] = useState<ExpenseHead[]>([]);
@@ -40,9 +42,9 @@ export default function NewPurchasePage() {
   async function fetchData() {
     try {
       const [supRes, expRes, purRes] = await Promise.all([
-        fetch('/api/data/suppliers'),
-        fetch('/api/data/expenseHeads'),
-        fetch('/api/data/purchases')
+        apiFetch('/api/data/suppliers'),
+        apiFetch('/api/data/expenseHeads'),
+        apiFetch('/api/data/purchases')
       ]);
       setSuppliers(await supRes.json());
       setExpenseHeads(await expRes.json());
@@ -72,7 +74,7 @@ export default function NewPurchasePage() {
     e.preventDefault();
     setSavingSupplier(true);
     try {
-      const res = await fetch('/api/data/suppliers', {
+      const res = await apiFetch('/api/data/suppliers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(supplierForm)
@@ -119,7 +121,7 @@ export default function NewPurchasePage() {
     setLoading(true);
     
     try {
-      const response = await fetch('/api/data/purchases', {
+      const response = await apiFetch('/api/data/purchases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

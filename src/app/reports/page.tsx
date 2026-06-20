@@ -5,10 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Supplier, Purchase, Payment, Bank, ExpenseHead, PropertyDetails } from '@/lib/types';
 import { BookOpen, Printer, Download } from 'lucide-react';
 import SearchableSelect from '@/components/SearchableSelect';
+import { useApi } from '@/lib/useApi';
 
 function ReportsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { apiFetch } = useApi();
   const activeTab = searchParams.get('view') || 'ledger';
   
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -44,12 +46,12 @@ function ReportsContent() {
     async function fetchData() {
       try {
         const [supRes, purRes, payRes, bankRes, expRes, propRes] = await Promise.all([
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/purchases'),
-          fetch('/api/data/payments'),
-          fetch('/api/data/banks'),
-          fetch('/api/data/expenseHeads'),
-          fetch('/api/data/propertyDetails')
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/purchases'),
+          apiFetch('/api/data/payments'),
+          apiFetch('/api/data/banks'),
+          apiFetch('/api/data/expenseHeads'),
+          apiFetch('/api/data/propertyDetails')
         ]);
         setSuppliers(await supRes.json());
         setPurchases(await purRes.json());

@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAlert } from '@/components/AlertContext';
+import { useApi } from '@/lib/useApi';
 
 export default function NewSupplierPage() {
   const router = useRouter();
   const { showAlert } = useAlert();
+  const { apiFetch } = useApi();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
@@ -23,7 +25,7 @@ export default function NewSupplierPage() {
     setLoading(true);
     
     try {
-      await fetch('/api/data/suppliers', {
+      await apiFetch('/api/data/suppliers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

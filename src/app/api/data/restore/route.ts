@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
+import { verifyAuthToken, getUserRole } from '@/lib/auth-helpers';
 
 export async function POST(request: Request) {
   try {
+    const decodedToken = await verifyAuthToken(request as any);
+    const role = await getUserRole(decodedToken.uid);
+    if (role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const rawBody = await request.text();
     let parsedData;
     try {

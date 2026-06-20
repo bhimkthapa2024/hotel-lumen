@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useAlert } from '@/components/AlertContext';
 import { Supplier } from '@/lib/types';
 import { Plus, Edit2, Save, X } from 'lucide-react';
+import { useApi } from '@/lib/useApi';
 
 export default function SuppliersPage() {
   const { showAlert } = useAlert();
+  const { apiFetch } = useApi();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -15,7 +17,7 @@ export default function SuppliersPage() {
 
   const fetchSuppliers = async () => {
     try {
-      const res = await fetch('/api/data/suppliers');
+      const res = await apiFetch('/api/data/suppliers');
       setSuppliers(await res.json());
     } catch (error) {
       console.error("Error fetching suppliers:", error);
@@ -41,7 +43,7 @@ export default function SuppliersPage() {
   const handleSaveEdit = async () => {
     if (!editForm.id) return;
     try {
-      await fetch('/api/data/suppliers', {
+      await apiFetch('/api/data/suppliers', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm)

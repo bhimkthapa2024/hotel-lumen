@@ -8,12 +8,14 @@ import { useAlert } from '@/components/AlertContext';
 import { useUser } from '@/components/UserContext';
 import { Supplier, Bank, Payment } from '@/lib/types';
 import SearchableSelect from '@/components/SearchableSelect';
+import { useApi } from '@/lib/useApi';
 
 export default function EditPaymentPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
   const { isAdmin } = useUser();
   const { showAlert, showConfirm } = useAlert();
+  const { apiFetch } = useApi();
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
@@ -36,9 +38,9 @@ export default function EditPaymentPage({ params }: { params: Promise<{ id: stri
     async function fetchData() {
       try {
         const [supRes, bankRes, payRes] = await Promise.all([
-          fetch('/api/data/suppliers'),
-          fetch('/api/data/banks'),
-          fetch('/api/data/payments')
+          apiFetch('/api/data/suppliers'),
+          apiFetch('/api/data/banks'),
+          apiFetch('/api/data/payments')
         ]);
         setSuppliers(await supRes.json());
         setBanks(await bankRes.json());
@@ -79,7 +81,7 @@ export default function EditPaymentPage({ params }: { params: Promise<{ id: stri
     setLoading(true);
     
     try {
-      const response = await fetch('/api/data/payments', {
+      const response = await apiFetch('/api/data/payments', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

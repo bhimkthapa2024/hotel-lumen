@@ -6,7 +6,7 @@ import { useUser } from './UserContext';
 import './Navigation.css';
 
 export default function Navigation() {
-  const { role, logout, isAdmin } = useUser();
+  const { role, logout, isAdmin, user } = useUser();
   return (
     <nav className="sidebar glass-panel">
       <div className="sidebar-header">
@@ -83,6 +83,13 @@ export default function Navigation() {
             </li>
           </ul>
         </li>
+        {isAdmin && (
+          <li>
+            <Link href="/users" className="nav-link">
+              <UserCog size={20} /> Users
+            </Link>
+          </li>
+        )}
         <li>
           <Link href="/setup" className="nav-link">
             <Settings size={20} /> Setup
@@ -94,10 +101,12 @@ export default function Navigation() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', background: isAdmin ? 'rgba(99, 102, 241, 0.1)' : 'var(--color-bg-base)' }}>
             <UserCog size={18} color={isAdmin ? 'var(--color-primary)' : 'var(--color-text-secondary)'} />
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', fontWeight: 700 }}>Current Role</p>
-              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <p style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', fontWeight: 700 }}>
                 {isAdmin ? 'Administrator' : 'Standard User'}
+              </p>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user?.displayName || user?.email || 'Loading...'}
               </p>
             </div>
           </div>

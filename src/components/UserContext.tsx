@@ -1,57 +1,88 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
-type Role = 'admin' | 'user';
+type Role = 'admin' | 'user' | null;
 
 interface UserContextType {
+  user: User | null;
   role: Role;
   isLoggedIn: boolean;
   isAdmin: boolean;
-  login: (role: Role) => void;
-  logout: () => void;
+  loading: boolean;
+  logout: () => Promise<void>;
+  refreshRole: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<Role>('user');
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
-  
-  // Try to load role from localStorage to persist state
-  useEffect(() => {
-    setIsMounted(true);
-    const savedRole = localStorage.getItem('lumen_role') as Role | null;
-    const savedStatus = localStorage.getItem('lumen_auth_status');
-    
-    if (savedStatus === 'loggedIn' && savedRole) {
-      setRoleState(savedRole);
-      setIsLoggedIn(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<Role>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchRole = async (currentUser: User) => {
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch('/api/auth/role', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRole(data.role);
+      } else {
+        setRole(null);
+      }
+    } catch (error) {
+      console.error('Failed to fetch role:', error);
+      setRole(null);
     }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        await fetchRole(currentUser);
+      } else {
+        setRole(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = (newRole: Role) => {
-    setRoleState(newRole);
-    setIsLoggedIn(true);
-    localStorage.setItem('lumen_role', newRole);
-    localStorage.setItem('lumen_auth_status', 'loggedIn');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Failed to sign out', error);
+    }
   };
 
-  const logout = () => {
-    setRoleState('user');
-    setIsLoggedIn(false);
-    localStorage.removeItem('lumen_role');
-    localStorage.removeItem('lumen_auth_status');
+  const refreshRole = async () => {
+    if (user) {
+      await fetchRole(user);
+    }
   };
 
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!isMounted) {
+  if (loading) {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-bg-base)' }}>Loading...</div>;
   }
 
   return (
-    <UserContext.Provider value={{ role, isLoggedIn, isAdmin: role === 'admin', login, logout }}>
+    <UserContext.Provider value={{ 
+      user, 
+      role, 
+      isLoggedIn: !!user && !!role, 
+      isAdmin: role === 'admin', 
+      loading, 
+      logout,
+      refreshRole
+    }}>
       {children}
     </UserContext.Provider>
   );

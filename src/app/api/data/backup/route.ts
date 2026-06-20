@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const dataFilePath = path.join(process.cwd(), 'data.json');
+import { db } from '@/lib/firebase-admin';
 
 export async function GET() {
   try {
-    if (!fs.existsSync(dataFilePath)) {
-      return NextResponse.json({ error: 'No data file found' }, { status: 404 });
-    }
-    const data = fs.readFileSync(dataFilePath, 'utf8');
+    const collections = ['suppliers', 'purchases', 'payments', 'banks', 'expenseHeads', 'propertyDetails'];
+    const data: any = {};
     
-    return new NextResponse(data, {
+    for (const col of collections) {
+      const snap = await db.collection(col).get();
+      data[col] = snap.docs.map(doc => doc.data());
+    }
+    
+    const jsonStr = JSON.stringify(data, null, 2);
+    
+    return new NextResponse(jsonStr, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

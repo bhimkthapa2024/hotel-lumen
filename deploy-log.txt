@@ -1,0 +1,153 @@
+﻿node.exe : No Firebase app associated with site hotel-lumen, injecting project default config.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (No Firebase app...default config.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  You can link a Web app to a Hosting site here 
+https://console.firebase.google.com/project/hotel-lumen/settings/general/web
+
+   Thank you for trying our [3mearly preview[23m of Next.js support on Firebase Hosting.
+   [31mDuring the preview, support is best-effort and breaking changes can be expected. Proceed with caution.[39m[33m
+   The integration is known to work with Next.js version [3m12 - 16.0[23m. You may encounter errors.[39m
+
+   [1mDocumentation:[22m https://firebase.google.com/docs/hosting/frameworks/nextjs
+   [1mFile a bug:[22m https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   [1mSubmit a feature request:[22m https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+Ôû▓ Next.js 16.2.9 (Turbopack)
+
+- Environments: .env.local
+
+
+  Creating an optimized production build ...
+
+Ô£ô Compiled successfully in 3.9s
+
+  Running TypeScript ...
+
+  Finished TypeScript in 4.8s ...
+
+  Collecting page data using 11 workers ...
+
+Firebase Admin initialized successfully.
+
+Firebase Admin initialized successfully.
+
+Firebase Admin initialized successfully.
+
+Firebase Admin initialized successfully.
+
+Firebase Admin initialized successfully.
+
+  Generating static pages using 11 workers (0/16) ...
+
+Firebase Admin initialized successfully.
+
+  Generating static pages using 11 workers (4/16) 
+
+  Generating static pages using 11 workers (8/16) 
+
+  Generating static pages using 11 workers (12/16) 
+
+Ô£ô Generating static pages using 11 workers (16/16) in 796ms
+
+  Finalizing page optimization ...
+
+
+
+Route (app)
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ ãÆ /api/data/[collection]
+Ôö£ ãÆ /api/data/backup
+Ôö£ ãÆ /api/data/migrate-to-firebase
+Ôö£ ãÆ /api/data/restore
+Ôö£ ãÆ /api/data/wipe
+Ôö£ Ôùï /payments
+Ôö£ ãÆ /payments/[id]
+Ôö£ ãÆ /payments/[id]/edit
+Ôö£ Ôùï /payments/new
+Ôö£ Ôùï /purchases
+Ôö£ ãÆ /purchases/[id]
+Ôö£ ãÆ /purchases/[id]/edit
+Ôö£ Ôùï /purchases/new
+Ôö£ Ôùï /reports
+Ôö£ Ôùï /setup
+Ôö£ Ôùï /suppliers
+Ôöö Ôùï /suppliers/new
+
+
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+
+
+Building a Cloud Function to run this application. This is needed due to:
+ ÔÇó non-static component /api/data/[collection]/route
+ ÔÇó non-static component /api/data/backup/route
+ ÔÇó non-static component /api/data/migrate-to-firebase/route
+ ÔÇó non-static component /api/data/restore/route
+ ÔÇó non-static component /api/data/wipe/route
+ ÔÇó and 4 other reasons, use --debug to see more
+
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'firebase-frameworks@0.11.8',
+npm warn EBADENGINE   required: { node: '^16.0.0 || ^18.0.0 || ^20.0.0 || ^22.0.0' },
+npm warn EBADENGINE   current: { node: 'v24.14.0', npm: '11.9.0' }
+npm warn EBADENGINE }
+
+up to date in 11s
+
+45 packages are looking for funding
+  run `npm fund` for details
+
+[1m[37m===[39m Deploying to 'hotel-lumen'...[22m
+
+[36m[1mi [22m[39m deploying [1mfunctions, hosting[22m
+[36m[1mi  functions:[22m[39m preparing codebase [1mfirebase-frameworks-hotel-lumen[22m for deployment
+[36m[1mi  functions:[22m[39m ensuring required API [1mcloudfunctions.googleapis.com[22m is enabled...
+[36m[1mi  functions:[22m[39m ensuring required API [1mcloudbuild.googleapis.com[22m is enabled...
+[36m[1mi  artifactregistry:[22m[39m ensuring required API [1martifactregistry.googleapis.com[22m is enabled...
+[33m[1m! [22m[39m [1m[33mfunctions: [39m[22mpackage.json indicates an outdated version of firebase-functions. Please upgrade using [1mnpm install --save firebase-functions@latest[22m in your functions directory.
+[33m[1m! [22m[39m [1m[33mfunctions: [39m[22mPlease note that there will be breaking changes when you upgrade.
+[36m[1mi  functions:[22m[39m Loading and analyzing source code for codebase firebase-frameworks-hotel-lumen to determine what to deploy
+Serving at port 8649
+
+[36m[1mi  extensions:[22m[39m ensuring required API [1mfirebaseextensions.googleapis.com[22m is enabled...
+[36m[1mi [22m[39m [36m[1mfunctions: [22m[39mLoaded environment variables from .env.
+[36m[1mi  functions:[22m[39m preparing [1m.firebase\hotel-lumen\functions[22m directory for uploading...
+[36m[1mi [22m[39m [36m[1mfunctions:[22m[39m packaged [1mF:\hotellumen\.firebase\hotel-lumen\functions[22m (3.79 MB) for uploading
+[36m[1mi  functions:[22m[39m ensuring required API [1mrun.googleapis.com[22m is enabled...
+[36m[1mi  functions:[22m[39m ensuring required API [1meventarc.googleapis.com[22m is enabled...
+[36m[1mi  functions:[22m[39m ensuring required API [1mpubsub.googleapis.com[22m is enabled...
+[36m[1mi  functions:[22m[39m ensuring required API [1mstorage.googleapis.com[22m is enabled...
+[36m[1mi  functions:[22m[39m generating the service identity for [1mpubsub.googleapis.com[22m...
+[36m[1mi  functions:[22m[39m generating the service identity for [1meventarc.googleapis.com[22m...
+[32m[1m+  functions:[22m[39m [1m.firebase\hotel-lumen\functions[22m source uploaded successfully
+[36m[1mi  hosting[hotel-lumen]:[22m[39m beginning deploy...
+[36m[1mi  hosting[hotel-lumen]:[22m[39m found 49 files in [1m.firebase\hotel-lumen\hosting[22m
+[32m[1m+  hosting[hotel-lumen]:[22m[39m file upload complete
+[36m[1mi  functions:[22m[39m updating Node.js 24 (2nd Gen) function [1mfirebase-frameworks-hotel-lumen:ssrhotellumen(us-central1)[22m...
+[32m[1m+ [22m[39m [1m[32mfunctions[firebase-frameworks-hotel-lumen:ssrhotellumen(us-central1)][39m[22m Successful update operation.
+[1mFunction URL[22m (firebase-frameworks-hotel-lumen:ssrhotellumen(us-central1)): https://ssrhotellumen-i55ofexa4a-uc.a.run.app
+[33m[1m!  functions:[22m[39m No cleanup policy detected for repositories in us-central1. This may result in a small monthly bill as container images accumulate over time.
+[34m?[39m [1mHow many days do you want to keep container images before they're deleted?[22m [2m(1)[22m
+[1A[82G[83G[1B[2K[1A[2K[G[34m?[39m [1mHow many days do you want to keep container images before they're deleted?[22m 1[79G[80G[2K[G[34m?[39m [1mHow many days do you want to keep container images before they're deleted?[22m 11[80G[81G[2K[G[34m?[39m [1mHow many days do you want to keep container images before they're deleted?[22m 111
+[1A[81G[78G[1B[2K[1A[2K[G[34m?[39m [1mHow many days do you want to keep container images before they're deleted?[22m 111
+[1A[81G[1B[2K[1A[2K[G[32mÔêÜ[39m [1mHow many days do you want to keep container images before they're deleted?[22m [36m111[39m
+[1A[81G[1B
+[?25h[36m[1mi  functions:[22m[39m Configuring cleanup policy for repository in us-central1. Images older than 111 days will be automatically deleted.
+[36m[1mi  functions:[22m[39m Configured cleanup policy for repository in us-central1.
+[36m[1mi  hosting[hotel-lumen]:[22m[39m finalizing version...
+[32m[1m+  hosting[hotel-lumen]:[22m[39m version finalized
+[36m[1mi  hosting[hotel-lumen]:[22m[39m releasing new version...
+[32m[1m+  hosting[hotel-lumen]:[22m[39m release complete
+
+[32m[1m+ [22m[39m [1m[4mDeploy complete![24m[22m
+
+[1mProject Console:[22m https://console.firebase.google.com/project/hotel-lumen/overview
+[1mHosting URL:[22m https://hotel-lumen.web.app

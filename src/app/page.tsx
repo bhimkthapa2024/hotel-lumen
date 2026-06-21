@@ -156,7 +156,7 @@ export default function Home() {
       </div>
       
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="dashboard-kpi-grid" style={{ gap: '1rem', marginBottom: '2rem' }}>
         
         <div className="glass-panel" style={{ padding: '0.875rem', borderLeft: '3px solid #ef4444' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -193,7 +193,7 @@ export default function Home() {
       </div>
 
       {/* Main Charts Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div className="dashboard-charts-grid" style={{ gap: '1.5rem', marginBottom: '2rem' }}>
         
         {/* Line Chart: Cash Flow */}
         <div className="glass-panel" style={{ padding: '1.5rem', height: '400px' }}>
@@ -246,7 +246,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
+      <div className="dashboard-bottom-grid" style={{ gap: '1.5rem' }}>
         
         {/* Recent Transactions */}
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
@@ -258,8 +258,8 @@ export default function Home() {
           {recentTransactions.length === 0 ? (
             <p style={{ color: 'var(--color-text-secondary)' }}>No recent activity found.</p>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="data-table-container">
+              <table className="data-table">
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
                     <th style={{ padding: '0.75rem 0', color: 'var(--color-text-secondary)', fontWeight: 600, fontSize: '0.875rem' }}>Type</th>
@@ -270,8 +270,8 @@ export default function Home() {
                 </thead>
                 <tbody>
                   {recentTransactions.map((tx, idx) => (
-                    <tr key={idx} className="table-row-hover" style={{ borderBottom: '1px solid var(--color-border-hover)', cursor: 'pointer' }} onClick={() => router.push(tx.type === 'Purchase' ? `/purchases/${tx.id}` : `/payments/${tx.id}`)}>
-                      <td style={{ padding: '1rem 0' }}>
+                    <tr key={idx} className="table-row-hover" style={{ cursor: 'pointer' }} onClick={() => router.push(tx.type === 'Purchase' ? `/purchases/${tx.id}` : `/payments/${tx.id}`)}>
+                      <td data-label="Type">
                         <span style={{ 
                           fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
                           color: '#000000'
@@ -279,9 +279,9 @@ export default function Home() {
                           {tx.type}
                         </span>
                       </td>
-                      <td style={{ padding: '1rem 0', color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>{tx.date}</td>
-                      <td style={{ padding: '1rem 0', color: 'var(--color-text-primary)', fontWeight: 500, fontSize: '0.875rem' }}>{getSupplierName(tx.supplierId)}</td>
-                      <td style={{ padding: '1rem 0', textAlign: 'right', fontWeight: 600, color: 'var(--color-text-primary)' }}>{formatCurrency(tx.amount || 0)}</td>
+                      <td data-label="Date">{tx.date}</td>
+                      <td data-label="Vendor">{getSupplierName(tx.supplierId)}</td>
+                      <td data-label="Amount" style={{ fontWeight: 600 }}>{formatCurrency(tx.amount || 0)}</td>
                     </tr>
                   ))}
                 </tbody>

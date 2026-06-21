@@ -380,3 +380,49 @@ a {
   backdrop-filter: blur(2px);
   z-index: 40;
 }
+/* Dashboard Grids */
+.dashboard-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.dashboard-charts-grid,
+.dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+}
+
+@media (max-width: 768px) {
+  .dashboard-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dashboard-charts-grid,
+  .dashboard-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Fix chart tooltips from overflowing or getting cut off */
+  .recharts-tooltip-wrapper {
+    z-index: 1000 !important;
+    max-width: 90vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Make all text slightly smaller on mobile to prevent squishing */
+@media (max-width: 768px) {
+  html {
+    font-size: 13px;
+  }
+  .data-table td {
+    font-size: 0.85rem;
+  }
+  .glass-panel {
+    padding: 1rem !important;
+  }
+}
+

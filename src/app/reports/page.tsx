@@ -447,8 +447,8 @@ function ReportsContent() {
                     <div style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.25rem' }}>FISCAL YEAR : {propertyDetails?.fiscalYearStart ? `${propertyDetails.fiscalYearStart} TO ${propertyDetails.fiscalYearEnd}` : '2025-2026'}</div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                    <div style={{ lineHeight: '1.4' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <div style={{ lineHeight: '1.4', flex: '1 1 300px' }}>
                       <div style={{ color: '#333' }}><strong>FROM DATE:</strong> {startDate || 'ALL'}</div>
                       <div style={{ color: '#333' }}><strong>TO DATE:</strong> {endDate || 'ALL'}</div>
                       <div style={{ marginTop: '0.5rem', color: '#333' }}><strong>NAME:</strong> {suppliers.find(s => s.id === selectedSupplierId)?.companyName?.toUpperCase() || ''}</div>
@@ -481,8 +481,8 @@ function ReportsContent() {
                   </div>
 
                   {/* Traditional Ledger Table */}
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', color: '#111' }}>
+                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', fontSize: '0.85rem', color: '#111' }}>
                       <thead>
                         <tr style={{ backgroundColor: '#fafafa', borderTop: '1px solid #ccc', borderBottom: '1px solid #ccc', textAlign: 'left' }}>
                           <th style={{ padding: '0.4rem', borderRight: '1px solid #e5e5e5', fontWeight: 700 }}>Transaction Date</th>

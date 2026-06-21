@@ -1,15 +1,30 @@
-import type { Metadata } from 'next';
+
 import './globals.css';
-import Navigation from '@/components/Navigation';
+import MainLayout from '@/components/MainLayout';
 import CursorEffect from '@/components/CursorEffect';
 import { AlertProvider } from '@/components/AlertContext';
 import { UserProvider } from '@/components/UserContext';
 
 import AuthGuard from '@/components/AuthGuard';
 
+import type { Metadata, Viewport } from 'next';
+
 export const metadata: Metadata = {
   title: 'Lumen Accounting',
   description: 'Luxury Supplier Management',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Lumen',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#4f46e5',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -24,31 +39,9 @@ export default function RootLayout({
         <AlertProvider>
           <AuthGuard>
             <CursorEffect />
-            <div style={{ display: 'flex', minHeight: '100vh' }}>
-            <div style={{ 
-              width: '280px', 
-              position: 'fixed', 
-              top: 0, 
-              left: 0, 
-              height: '100vh',
-              padding: '2rem 1.5rem',
-              zIndex: 50
-            }}>
-              <Navigation />
-            </div>
-
-            <main style={{ 
-              marginLeft: '280px', 
-              flex: 1, 
-              padding: '2rem 3rem',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
-              <div style={{ width: '100%' }}>
-                {children}
-              </div>
-            </main>
-          </div>
+            <MainLayout>
+              {children}
+            </MainLayout>
           </AuthGuard>
         </AlertProvider>
         </UserProvider>

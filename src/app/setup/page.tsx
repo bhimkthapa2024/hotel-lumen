@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useAlert } from '@/components/AlertContext';
-import { Bank, ExpenseHead, PropertyDetails } from '@/lib/types';
-import { Save, Building2, Tag, Pencil, X, Check, FileText, AlertTriangle, Download, UploadCloud } from 'lucide-react';
+import { Bank, ExpenseHead, PropertyDetails, PaymentMethod } from '@/lib/types';
+import { Save, Building2, Tag, Pencil, X, Check, FileText, AlertTriangle, Download, UploadCloud, CreditCard } from 'lucide-react';
 import { useUser } from '@/components/UserContext';
 import { useApi } from '@/lib/useApi';
 
@@ -11,7 +11,7 @@ export default function SetupPage() {
   const { showAlert } = useAlert();
   const { isAdmin, logout } = useUser();
   const { apiFetch } = useApi();
-  const [activeTab, setActiveTab] = useState<'property' | 'banks' | 'expenses'>('property');
+  const [activeTab, setActiveTab] = useState<'property' | 'banks' | 'expenses' | 'paymentMethods'>('property');
   const [loading, setLoading] = useState(true);
   const [isWiping, setIsWiping] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -20,6 +20,7 @@ export default function SetupPage() {
   const [propertyDetails, setPropertyDetails] = useState<PropertyDetails | null>(null);
   const [banks, setBanks] = useState<Bank[]>([]);
   const [expenseHeads, setExpenseHeads] = useState<ExpenseHead[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   // Forms
   const [propertyForm, setPropertyForm] = useState<Partial<PropertyDetails>>({
@@ -29,6 +30,7 @@ export default function SetupPage() {
   const [bankForm, setBankForm] = useState({ name: '', accountNumber: '' });
   const [expenseForm, setExpenseForm] = useState({ name: '', description: '', subLedgersStr: '' });
   const [mappingForm, setMappingForm] = useState({ expenseHeadId: '', subLedgersStr: '' });
+  const [paymentMethodForm, setPaymentMethodForm] = useState({ name: '', requiresBank: false });
 
   // Edit States
   const [editingBankId, setEditingBankId] = useState<string | null>(null);
@@ -37,22 +39,28 @@ export default function SetupPage() {
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [editExpenseForm, setEditExpenseForm] = useState({ name: '', description: '' });
 
+  const [editingPaymentMethodId, setEditingPaymentMethodId] = useState<string | null>(null);
+  const [editPaymentMethodForm, setEditPaymentMethodForm] = useState({ name: '', requiresBank: false });
+
   // Saving states
   const [savingProperty, setSavingProperty] = useState(false);
   const [savingBank, setSavingBank] = useState(false);
   const [savingExpense, setSavingExpense] = useState(false);
   const [savingMapping, setSavingMapping] = useState(false);
+  const [savingPaymentMethod, setSavingPaymentMethod] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [banksRes, expensesRes, propertyRes] = await Promise.all([
+      const [banksRes, expensesRes, propertyRes, paymentMethodsRes] = await Promise.all([
         apiFetch('/api/data/banks'),
         apiFetch('/api/data/expenseHeads'),
-        apiFetch('/api/data/propertyDetails')
+        apiFetch('/api/data/propertyDetails'),
+        apiFetch('/api/data/paymentMethods')
       ]);
       
       setBanks(await banksRes.json());
       setExpenseHeads(await expensesRes.json());
+      setPaymentMethods(await paymentMethodsRes.json());
       
       const props = await propertyRes.json();
       if (props && props.length > 0) {
@@ -207,6 +215,41 @@ export default function SetupPage() {
     }
   };
 
+  // --- Payment Methods Logic ---
+  const handleAddPaymentMethod = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingPaymentMethod(true);
+    try {
+      await apiFetch('/api/data/paymentMethods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentMethodForm)
+      });
+      setPaymentMethodForm({ name: '', requiresBank: false });
+      showAlert("Payment Method added successfully", "success");
+      fetchData();
+    } catch (error) {
+      showAlert("Error adding payment method", "error");
+    } finally {
+      setSavingPaymentMethod(false);
+    }
+  };
+
+  const handleUpdatePaymentMethod = async (id: string) => {
+    try {
+      await apiFetch('/api/data/paymentMethods', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...editPaymentMethodForm })
+      });
+      setEditingPaymentMethodId(null);
+      showAlert("Payment Method updated successfully", "success");
+      fetchData();
+    } catch (error) {
+      showAlert("Error updating payment method", "error");
+    }
+  };
+
   const handleWipeData = async () => {
     if (!window.confirm("DANGER: Are you absolutely sure you want to wipe ALL data? This will factory reset the entire system. This action cannot be undone.")) {
       return;
@@ -325,6 +368,17 @@ export default function SetupPage() {
           }}
         >
           <Tag size={18} /> Expense Heads
+        </button>
+        <button 
+          onClick={() => setActiveTab('paymentMethods')}
+          style={{
+            padding: '1rem 1.5rem', background: 'none', border: 'none', cursor: 'pointer',
+            borderBottom: activeTab === 'paymentMethods' ? '2px solid var(--color-primary)' : '2px solid transparent',
+            color: activeTab === 'paymentMethods' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+            fontWeight: activeTab === 'paymentMethods' ? 600 : 500, display: 'flex', alignItems: 'center', gap: '0.5rem'
+          }}
+        >
+          <CreditCard size={18} /> Payment Methods
         </button>
       </div>
 
@@ -537,47 +591,113 @@ export default function SetupPage() {
         </div>
       )}
 
-      {/* BACKUP AND RESTORE (Admin Only) */}
-      {isAdmin && (
-        <div style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #c7d2fe', borderRadius: 'var(--radius-lg)', backgroundColor: '#eef2ff' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
-            <div style={{ backgroundColor: '#e0e7ff', padding: '1rem', borderRadius: '50%' }}>
-              <Save size={24} color="#4f46e5" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ color: '#3730a3', fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Data Backup & Restore</h3>
-              <p style={{ color: '#4338ca', marginBottom: '1.5rem', fontSize: '0.875rem', lineHeight: '1.5' }}>
-                Download a complete copy of your database to keep it safe. You can restore your data from this backup file at any time.
-              </p>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button 
-                  onClick={handleExportBackup}
-                  style={{ 
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    backgroundColor: '#4f46e5', color: 'white', border: 'none', padding: '0.75rem 1.5rem', 
-                    borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                >
-                  <Download size={16} /> Export Backup File
-                </button>
-                <button 
-                  onClick={handleImportBackup}
-                  disabled={isRestoring}
-                  style={{ 
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    backgroundColor: 'white', color: '#4f46e5', border: '1px solid #4f46e5', padding: '0.75rem 1.5rem', 
-                    borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: isRestoring ? 'not-allowed' : 'pointer',
-                    opacity: isRestoring ? 0.7 : 1, transition: 'background-color 0.2s'
-                  }}
-                >
-                  <UploadCloud size={16} /> {isRestoring ? 'Restoring...' : 'Restore from Backup'}
-                </button>
+      {/* Payment Methods Tab */}
+      {activeTab === 'paymentMethods' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Add Payment Method</h2>
+            <form onSubmit={handleAddPaymentMethod}>
+              <div className="form-group">
+                <label className="form-label">Method Name</label>
+                <input type="text" className="form-input" required 
+                  value={paymentMethodForm.name} onChange={e => setPaymentMethodForm({...paymentMethodForm, name: e.target.value})}
+                />
               </div>
-            </div>
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input type="checkbox" id="requiresBank" 
+                  checked={paymentMethodForm.requiresBank} onChange={e => setPaymentMethodForm({...paymentMethodForm, requiresBank: e.target.checked})}
+                />
+                <label htmlFor="requiresBank" style={{ margin: 0 }}>Requires Bank Account</label>
+              </div>
+              <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={savingPaymentMethod}>
+                <Save size={18} /> Add Payment Method
+              </button>
+            </form>
+          </div>
+
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Existing Payment Methods</h2>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {paymentMethods.map(pm => (
+                <li key={pm.id} style={{ padding: '1rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: 'var(--color-bg-surface)' }}>
+                  {editingPaymentMethodId === pm.id ? (
+                    <div>
+                      <input type="text" className="form-input" style={{ marginBottom: '0.5rem' }} value={editPaymentMethodForm.name} onChange={e => setEditPaymentMethodForm({...editPaymentMethodForm, name: e.target.value})} />
+                      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <input type="checkbox" id={`editRequiresBank_${pm.id}`} 
+                          checked={editPaymentMethodForm.requiresBank} onChange={e => setEditPaymentMethodForm({...editPaymentMethodForm, requiresBank: e.target.checked})}
+                        />
+                        <label htmlFor={`editRequiresBank_${pm.id}`} style={{ margin: 0 }}>Requires Bank Account</label>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn-primary" onClick={() => handleUpdatePaymentMethod(pm.id!)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
+                          <Check size={14} /> Save
+                        </button>
+                        <button className="btn-secondary" onClick={() => setEditingPaymentMethodId(null)} style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
+                          <X size={14} /> Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <p style={{ fontWeight: 600 }}>{pm.name}</p>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                          {pm.requiresBank ? 'Requires Bank Account' : 'Does not require Bank Account'}
+                        </p>
+                      </div>
+                      <button onClick={() => { setEditingPaymentMethodId(pm.id!); setEditPaymentMethodForm({ name: pm.name, requiresBank: pm.requiresBank }); }} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+                        <Pencil size={16} />
+                      </button>
+                    </div>
+                  )}
+                </li>
+              ))}
+              {paymentMethods.length === 0 && <p style={{ color: 'var(--color-text-secondary)' }}>No payment methods configured.</p>}
+            </ul>
           </div>
         </div>
       )}
+
+      {/* BACKUP AND RESTORE */}
+      <div style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #c7d2fe', borderRadius: 'var(--radius-lg)', backgroundColor: '#eef2ff' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
+          <div style={{ backgroundColor: '#e0e7ff', padding: '1rem', borderRadius: '50%' }}>
+            <Save size={24} color="#4f46e5" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ color: '#3730a3', fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>Data Backup & Restore</h3>
+            <p style={{ color: '#4338ca', marginBottom: '1.5rem', fontSize: '0.875rem', lineHeight: '1.5' }}>
+              Download a complete copy of your database to keep it safe. You can restore your data from this backup file at any time.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button 
+                onClick={handleExportBackup}
+                style={{ 
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  backgroundColor: '#4f46e5', color: 'white', border: 'none', padding: '0.75rem 1.5rem', 
+                  borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+              >
+                <Download size={16} /> Export Backup File
+              </button>
+              <button 
+                onClick={handleImportBackup}
+                disabled={isRestoring}
+                style={{ 
+                  display: 'flex', alignItems: 'center', gap: '0.5rem',
+                  backgroundColor: 'white', color: '#4f46e5', border: '1px solid #4f46e5', padding: '0.75rem 1.5rem', 
+                  borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: isRestoring ? 'not-allowed' : 'pointer',
+                  opacity: isRestoring ? 0.7 : 1, transition: 'background-color 0.2s'
+                }}
+              >
+                <UploadCloud size={16} /> {isRestoring ? 'Restoring...' : 'Restore from Backup'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* DANGER ZONE (Admin Only) */}
       {isAdmin && (

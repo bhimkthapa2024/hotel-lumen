@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAlert } from '@/components/AlertContext';
-import { Supplier, Bank } from '@/lib/types';
+import { Supplier, Bank, PaymentMethod } from '@/lib/types';
 import SearchableSelect from '@/components/SearchableSelect';
 import { useApi } from '@/lib/useApi';
 
@@ -16,6 +16,7 @@ export default function NewPaymentPage() {
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [formData, setFormData] = useState({
     supplierId: '',
     bankId: '',
@@ -29,12 +30,22 @@ export default function NewPaymentPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [supRes, bankRes] = await Promise.all([
+        const [supRes, bankRes, pmRes] = await Promise.all([
           apiFetch('/api/data/suppliers'),
-          apiFetch('/api/data/banks')
+          apiFetch('/api/data/banks'),
+          apiFetch('/api/data/paymentMethods')
         ]);
         setSuppliers(await supRes.json());
         setBanks(await bankRes.json());
+        
+        const pmData = await pmRes.json();
+        setPaymentMethods(pmData);
+        if (pmData.length > 0 && formData.paymentMethod === 'Bank Transfer') {
+          // If the default value isn't in the DB but there are items, default to the first
+          if (!pmData.find((m: PaymentMethod) => m.name === 'Bank Transfer')) {
+            setFormData(prev => ({ ...prev, paymentMethod: pmData[0].name }));
+          }
+        }
       } catch(err) {
         console.error(err);
       }
@@ -42,10 +53,13 @@ export default function NewPaymentPage() {
     fetchData();
   }, []);
 
+  const selectedMethod = paymentMethods.find(m => m.name === formData.paymentMethod);
+  const requiresBank = selectedMethod ? selectedMethod.requiresBank : false;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.supplierId) return showAlert("Please select a supplier", "warning");
-    if (formData.paymentMethod !== 'Cash' && !formData.bankId) return showAlert("Please select a bank", "warning");
+    if (requiresBank && !formData.bankId) return showAlert("Please select a bank", "warning");
     
     const confirmed = await showConfirm("Are you sure you want to save this payment?\nPlease verify the amount before confirming.", "confirm");
     if (!confirmed) return;
@@ -109,7 +123,7 @@ export default function NewPaymentPage() {
               />
             </div>
 
-            {formData.paymentMethod !== 'Cash' && (
+            {requiresBank && (
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label" htmlFor="bankId">From Bank Account</label>
                 <SearchableSelect 
@@ -135,12 +149,7 @@ export default function NewPaymentPage() {
             <div className="form-group">
               <label className="form-label" htmlFor="paymentMethod">Payment Method</label>
               <SearchableSelect 
-                options={[
-                  { value: 'Bank Transfer', label: 'Bank Transfer' },
-                  { value: 'Check', label: 'Check' },
-                  { value: 'Cash', label: 'Cash' },
-                  { value: 'Credit Card', label: 'Credit Card' }
-                ]}
+                options={paymentMethods.map(m => ({ value: m.name, label: m.name }))}
                 value={formData.paymentMethod}
                 onChange={(val: string) => handleSelectChange('paymentMethod', val)}
                 required
@@ -151,11 +160,11 @@ export default function NewPaymentPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
             <div className="form-group">
               <label className="form-label" htmlFor="referenceNumber">
-                {formData.paymentMethod === 'Cash' ? 'Receipt / Voucher Number (Optional)' : 'Reference / Check Number'}
+                {requiresBank ? 'Reference / Check Number' : 'Reference / Details (Optional)'}
               </label>
               <input 
-                type="text" id="referenceNumber" name="referenceNumber" className="form-input" placeholder={formData.paymentMethod === 'Cash' ? "CASH-RCPT-123" : "REF-12345"} 
-                required={formData.paymentMethod !== 'Cash'}
+                type="text" id="referenceNumber" name="referenceNumber" className="form-input" placeholder={requiresBank ? "REF-12345" : "Optional details"} 
+                required={requiresBank}
                 value={formData.referenceNumber} onChange={handleChange}
               />
             </div>

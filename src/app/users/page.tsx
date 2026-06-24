@@ -97,6 +97,28 @@ export default function UsersPage() {
     }
   };
 
+  const handleChangeRole = async (uid: string, newRole: string) => {
+    try {
+      const token = await currentUser?.getIdToken();
+      const res = await fetch('/api/auth/users', {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ uid, newRole })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+      showAlert("User role updated", "success");
+      fetchUsers();
+    } catch (e: any) {
+      showAlert(e.message || "Failed to update role", "error");
+    }
+  };
+
   return (
     <div className="container">
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -125,10 +147,22 @@ export default function UsersPage() {
                   <td><strong>{u.displayName}</strong></td>
                   <td>{u.email}</td>
                   <td>
-                    <span className={`status-pill ${u.role === 'admin' ? 'info' : 'success'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                      {u.role === 'admin' ? <Shield size={12} /> : <UserIcon size={12} />}
-                      {u.role}
-                    </span>
+                    {u.id === currentUser?.uid ? (
+                      <span className={`status-pill ${u.role === 'admin' ? 'info' : 'success'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {u.role === 'admin' ? <Shield size={12} /> : <UserIcon size={12} />}
+                        {u.role.toUpperCase()}
+                      </span>
+                    ) : (
+                      <select 
+                        className="form-input" 
+                        style={{ padding: '0.25rem 0.5rem', height: 'auto', fontSize: '0.875rem', width: 'auto', display: 'inline-block' }}
+                        value={u.role}
+                        onChange={(e) => handleChangeRole(u.id, e.target.value)}
+                      >
+                        <option value="user">USER</option>
+                        <option value="admin">ADMIN</option>
+                      </select>
+                    )}
                   </td>
                   <td>
                     {u.id !== currentUser?.uid && (

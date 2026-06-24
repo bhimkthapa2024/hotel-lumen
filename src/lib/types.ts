@@ -28,6 +28,13 @@ export interface Bank {
   createdAt?: any;
 }
 
+export interface PaymentMethod {
+  id?: string;
+  name: string;
+  requiresBank: boolean;
+  createdAt?: any;
+}
+
 export interface SubLedger {
   id: string;
   name: string;

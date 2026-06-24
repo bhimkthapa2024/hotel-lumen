@@ -14,12 +14,18 @@ try {
   });
 
   const db = getFirestore();
-  const uid = 'uTdN2Oi9iHbV9Vz6CChnosg3SUN2';
+  const emailArg = process.argv[2];
 
   async function setAdmin() {
     try {
-      // Get user email
-      const userRecord = await getAuth().getUser(uid);
+      if (!emailArg) {
+        console.error('Please provide the user email as an argument: node setAdmin.js your@email.com');
+        process.exit(1);
+      }
+
+      // Get user by email
+      const userRecord = await getAuth().getUserByEmail(emailArg);
+      const uid = userRecord.uid;
       
       await db.collection('users').doc(uid).set({
         email: userRecord.email,
